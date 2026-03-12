@@ -1,0 +1,28 @@
+{
+  "name": "agentgate-mcp-plugin",
+  "version": "1.0.0",
+  "description": "AgentGate MCP Plugin for security and governance",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "prepare": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "security",
+    "agentgate",
+    "governance"
+  ],
+  "author": "AgentGate",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "rimraf": "^5.0.0"
+  }
+}
