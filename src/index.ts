@@ -1,34 +1,39 @@
 import axios from 'axios';
 
-interface AgentGateConfig {
+interface SupraWallConfig {
   apiKey: string;
-  apiUrl: string;
+  apiUrl?: string;
 }
 
 interface PolicyCheckRequest {
-  agent_id: string;
-  tool_name: string;
-  parameters?: any;
+  agentRole?: string;
+  toolName: string;
+  args: any;
+  sessionId?: string;
 }
 
 interface ApprovalRequest {
-  agent_id: string;
-  action_description: string;
-  risk_level: 'low' | 'medium' | 'high' | 'critical';
+  toolName: string;
+  args: any;
+  reason: string;
+  riskLevel?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 interface AuditLogRequest {
-  agent_id: string;
   action: string;
+  toolName?: string;
+  args?: any;
   outcome: 'allowed' | 'denied' | 'approved';
 }
 
-class AgentGateMCP {
-  private config: AgentGateConfig;
+class SupraWallMCP {
+  private config: SupraWallConfig;
+  private readonly DEFAULT_API_URL = 'https://www.supra-wall.com/api/v1';
+  private readonly DEFAULT_DASHBOARD_URL = 'https://www.supra-wall.com';
   
-  constructor(config: AgentGateConfig) {
+  constructor(config: SupraWallConfig) {
     this.config = {
-      apiUrl: config.apiUrl || 'https://api.agentgate.com',
+      apiUrl: config.apiUrl || this.DEFAULT_API_URL,
       apiKey: config.apiKey
     };
   }
@@ -36,32 +41,30 @@ class AgentGateMCP {
   async checkPolicy(request: PolicyCheckRequest) {
     try {
       const response = await axios.post(
-        `${this.config.apiUrl}/v1/policy/check`,
+        `${this.config.apiUrl}/evaluateAction`,
         {
-          agent_id: request.agent_id,
-          tool_name: request.tool_name,
-          parameters: request.parameters || {}
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.config.apiKey}`,
-            'Content-Type': 'application/json'
-          }
+          apiKey: this.config.apiKey,
+          toolName: request.toolName,
+          args: request.args,
+          sessionId: request.sessionId,
+          agentRole: request.agentRole
         }
       );
       
       return {
         decision: response.data.decision,
         reason: response.data.reason,
-        risk_score: response.data.risk_score,
-        approval_required: response.data.decision === 'REQUIRE_APPROVAL'
+        risk_score: response.data.risk_score || 0,
+        requestId: response.data.requestId,
+        approval_required: response.data.decision === 'REQUIRE_APPROVAL',
+        branding: response.data.branding
       };
-    } catch (error) {
-      console.error('AgentGate policy check failed:', error);
-      // Fail open - allow action if service is down
+    } catch (error: any) {
+      console.error('SupraWall policy check failed:', error.response?.data || error.message);
+      // Fail open for now, but in strict mode we might want to fail closed
       return {
         decision: 'ALLOW',
-        reason: 'Policy service unavailable',
+        reason: 'SupraWall Safety Layer unavailable (Fail-Open)',
         risk_score: 0,
         approval_required: false
       };
@@ -70,70 +73,66 @@ class AgentGateMCP {
   
   async requestApproval(request: ApprovalRequest) {
     try {
+      // Note: In the current backend, approvals are primarily triggered via evaluateAction
+      // returning REQUIRE_APPROVAL. This manual trigger uses evaluateAction with a flag.
       const response = await axios.post(
-        `${this.config.apiUrl}/v1/approvals/request`,
+        `${this.config.apiUrl}/evaluateAction`,
         {
-          agent_id: request.agent_id,
-          action_description: request.action_description,
-          risk_level: request.risk_level
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.config.apiKey}`,
-            'Content-Type': 'application/json'
-          }
+          apiKey: this.config.apiKey,
+          toolName: request.toolName,
+          args: request.args,
+          forceApproval: true,
+          reason: request.reason
         }
       );
       
+      const requestId = response.data.requestId;
       return {
-        approval_id: response.data.approval_id,
-        status: response.data.status,
-        dashboard_url: `${this.config.apiUrl.replace('api.', 'app.')}/approvals/${response.data.approval_id}`
+        requestId: requestId,
+        status: response.data.decision === 'REQUIRE_APPROVAL' ? 'pending' : 'decided',
+        dashboard_url: `${this.DEFAULT_DASHBOARD_URL}/dashboard/approvals`
       };
-    } catch (error) {
-      console.error('AgentGate approval request failed:', error);
+    } catch (error: any) {
+      console.error('SupraWall approval request failed:', error.response?.data || error.message);
       throw new Error('Failed to request approval');
     }
   }
   
   async logAction(request: AuditLogRequest) {
     try {
+      // The current backend logs automatically via evaluateAction.
+      // We call evaluateAction with a "logOnly" intention if needed, 
+      // or we can use a dedicated audit endpoint if we add it later.
       await axios.post(
-        `${this.config.apiUrl}/v1/audit/log`,
+        `${this.config.apiUrl}/evaluateAction`,
         {
-          agent_id: request.agent_id,
-          action: request.action,
-          outcome: request.outcome,
-          timestamp: new Date().toISOString()
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.config.apiKey}`,
-            'Content-Type': 'application/json'
-          }
+          apiKey: this.config.apiKey,
+          toolName: request.toolName || request.action,
+          args: request.args || {},
+          logOnly: true,
+          outcome: request.outcome
         }
       );
       
       return { success: true };
-    } catch (error) {
-      console.error('AgentGate audit log failed:', error);
-      // Don't throw - logging failures shouldn't block operations
+    } catch (error: any) {
+      console.error('SupraWall audit log failed:', error.response?.data || error.message);
       return { success: false };
     }
   }
 }
 
 // MCP Plugin exports
-export default async function initialize(config: AgentGateConfig) {
-  const agentgate = new AgentGateMCP(config);
+export default async function initialize(config: SupraWallConfig) {
+  const suprawall = new SupraWallMCP(config);
   
   return {
-    name: 'agentgate',
-    version: '1.0.0',
+    name: 'suprawall',
+    version: '1.1.0',
     tools: {
-      check_policy: agentgate.checkPolicy.bind(agentgate),
-      request_approval: agentgate.requestApproval.bind(agentgate),
-      log_action: agentgate.logAction.bind(agentgate)
+      check_policy: suprawall.checkPolicy.bind(suprawall),
+      request_approval: suprawall.requestApproval.bind(suprawall),
+      log_action: suprawall.logAction.bind(suprawall)
     }
   };
 }

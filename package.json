@@ -1,7 +1,7 @@
 {
-  "name": "agentgate-mcp-plugin",
-  "version": "1.0.0",
-  "description": "AgentGate MCP Plugin for security and governance",
+  "name": "suprawall-mcp-plugin",
+  "version": "1.1.0",
+  "description": "SupraWall MCP Plugin for security and governance",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -12,10 +12,10 @@
   "keywords": [
     "mcp",
     "security",
-    "agentgate",
+    "suprawall",
     "governance"
   ],
-  "author": "AgentGate",
+  "author": "SupraWall",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.0"

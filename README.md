@@ -1,4 +1,4 @@
-# AgentGate MCP Plugin
+# SupraWall MCP Plugin
 
 Add enterprise-grade security to your Claude Desktop agents.
 
@@ -14,33 +14,33 @@ Add enterprise-grade security to your Claude Desktop agents.
 ### 1. Install the plugin
 
 ```bash
-# In Claude Desktop, run:
-/plugin marketplace add agentgate/agentgate-mcp-plugin
+# While in review at the official Anthropic directory, install manually:
+/plugin marketplace add wiserautomation/suprawall-mcp-plugin
 ```
 
 ### 2. Get your API key
-1. Sign up at [app.agentgate.com](https://app.agentgate.com)
+1. Sign up at [app.suprawall.ai](https://app.suprawall.ai)
 2. Create an agent identity
 3. Copy your API key
 
 ### 3. Configure the plugin
 ```bash
-/plugin configure agentgate
+/plugin configure suprawall
 # Enter your API key when prompted
 ```
 
 ## Usage
-AgentGate automatically secures your Claude Desktop agents. No code changes needed!
+SupraWall automatically secures your Claude Desktop agents. No code changes needed!
 
 ### Example: Block dangerous commands
 **You:** Delete all files in /production
-**Claude:** I'll check with AgentGate first...
-        🛡️ AgentGate blocked this action
+**Claude:** I'll check with SupraWall first...
+        🛡️ SupraWall blocked this action
         Reason: Destructive operation requires approval
 
 ### Example: Require approval for high-value actions
 **You:** Process a $5,000 refund for order #12345
-**Claude:** AgentGate requires approval for this action
+**Claude:** SupraWall requires approval for this action
         📧 Notification sent to admin@yourcompany.com
         ⏳ Waiting for approval...
         
@@ -86,7 +86,7 @@ Returns:
 {
   "approval_id": "apr_xyz789",
   "status": "pending",
-  "dashboard_url": "https://app.agentgate.com/approvals/apr_xyz789"
+  "dashboard_url": "https://app.suprawall.ai/approvals/apr_xyz789"
 }
 ```
 
@@ -103,22 +103,22 @@ Log to audit trail:
 
 ## Configuration
 Configure via environment variables or Claude Desktop settings:
-- `AGENTGATE_API_KEY` - Your API key (required)
-- `AGENTGATE_API_URL` - API endpoint (default: `https://api.agentgate.com`)
+- `SUPRAWALL_API_KEY` - Your API key (required)
+- `SUPRAWALL_API_URL` - API endpoint (default: `https://api.suprawall.ai`)
 
 ## Pricing
 - **Free**: 10,000 policy checks/month
 - **Pro ($99/mo)**: 100,000 policy checks/month
 - **Enterprise**: Custom
 
-[View pricing →](https://agentgate.com/pricing)
+[View pricing →](https://suprawall.ai/pricing)
 
 ## Support
-- 📧 Email: support@agentgate.com
-- 💬 Slack: [Join our community](https://join.slack.com/agentgate)
-- 📚 Docs: [agentgate.com/docs](https://agentgate.com/docs)
+- 📧 Email: support@suprawall.ai
+- 💬 Slack: [Join our community](https://join.slack.com/suprawall)
+- 📚 Docs: [suprawall.ai/docs](https://suprawall.ai/docs)
 
 ## License
 MIT
 
-Made by **AgentGate** - The Stripe of AI Agent Security
+Made by **SupraWall** - The Stripe of AI Agent Security

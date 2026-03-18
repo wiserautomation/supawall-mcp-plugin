@@ -1,6 +1,6 @@
-# Basic Usage of AgentGate MCP Plugin
+# Basic Usage of SupraWall MCP Plugin
 
-This guide shows how to manually use the tools provided by the AgentGate MCP plugin.
+This guide shows how to manually use the tools provided by the SupraWall MCP plugin.
 
 ## 1. Check Policy
 Before executing a tool, you should check if it's allowed:

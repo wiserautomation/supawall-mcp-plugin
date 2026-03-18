@@ -1,19 +1,19 @@
 {
-  "name": "agentgate",
-  "displayName": "AgentGate Security",
+  "name": "suprawall",
+  "displayName": "SupraWall Security",
   "description": "Add security policies and approval workflows to your AI agents. Block dangerous actions, require human approval for high-risk operations, and maintain compliance-ready audit logs.",
   "version": "1.0.0",
   "author": {
-    "name": "AgentGate",
-    "email": "support@agentgate.com",
-    "url": "https://agentgate.com"
+    "name": "SupraWall",
+    "email": "support@suprawall.ai",
+    "url": "https://suprawall.ai"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/agentgate/agentgate-mcp-plugin"
+    "url": "https://github.com/suprawall/suprawall-mcp-plugin"
   },
-  "homepage": "https://agentgate.com/mcp",
-  "documentation": "https://agentgate.com/docs/mcp",
+  "homepage": "https://suprawall.ai/mcp",
+  "documentation": "https://suprawall.ai/docs/mcp",
   "license": "MIT",
   "keywords": [
     "security",
@@ -100,13 +100,13 @@
   "configuration": {
     "api_key": {
       "type": "string",
-      "description": "Your AgentGate API key (get it at https://app.agentgate.com)",
+      "description": "Your SupraWall API key (get it at https://app.suprawall.ai)",
       "required": true
     },
     "api_url": {
       "type": "string",
-      "description": "AgentGate API endpoint",
-      "default": "https://api.agentgate.com",
+      "description": "SupraWall API endpoint",
+      "default": "https://api.suprawall.ai",
       "required": false
     }
   },
@@ -123,13 +123,13 @@
         "name": "Pro",
         "price": "$99/month",
         "description": "100,000 policy checks per month",
-        "url": "https://agentgate.com/pricing"
+        "url": "https://suprawall.ai/pricing"
       }
     ]
   },
   "support": {
-    "email": "support@agentgate.com",
-    "slack": "https://join.slack.com/agentgate",
-    "documentation": "https://agentgate.com/docs"
+    "email": "support@suprawall.ai",
+    "slack": "https://join.slack.com/suprawall",
+    "documentation": "https://suprawall.ai/docs"
   }
 }
