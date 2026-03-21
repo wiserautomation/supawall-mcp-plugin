@@ -5,15 +5,15 @@
   "version": "1.0.0",
   "author": {
     "name": "SupraWall",
-    "email": "support@suprawall.ai",
-    "url": "https://suprawall.ai"
+    "email": "support@supra-wall.com",
+    "url": "https://www.supra-wall.com"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/suprawall/suprawall-mcp-plugin"
   },
-  "homepage": "https://suprawall.ai/mcp",
-  "documentation": "https://suprawall.ai/docs/mcp",
+  "homepage": "https://www.supra-wall.com/mcp",
+  "documentation": "https://www.supra-wall.com/docs/mcp",
   "license": "MIT",
   "keywords": [
     "security",
@@ -100,13 +100,13 @@
   "configuration": {
     "api_key": {
       "type": "string",
-      "description": "Your SupraWall API key (get it at https://app.suprawall.ai)",
+      "description": "Your SupraWall API key (get it at https://app.supra-wall.com)",
       "required": true
     },
     "api_url": {
       "type": "string",
       "description": "SupraWall API endpoint",
-      "default": "https://api.suprawall.ai",
+      "default": "https://api.supra-wall.com",
       "required": false
     }
   },
@@ -123,13 +123,13 @@
         "name": "Pro",
         "price": "$99/month",
         "description": "100,000 policy checks per month",
-        "url": "https://suprawall.ai/pricing"
+        "url": "https://www.supra-wall.com/pricing"
       }
     ]
   },
   "support": {
-    "email": "support@suprawall.ai",
+    "email": "support@supra-wall.com",
     "slack": "https://join.slack.com/suprawall",
-    "documentation": "https://suprawall.ai/docs"
+    "documentation": "https://www.supra-wall.com/docs"
   }
 }

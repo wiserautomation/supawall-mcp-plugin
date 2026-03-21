@@ -1,13 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = initialize;
-const axios_1 = __importDefault(require("axios"));
+import axios from 'axios';
 class SupraWallMCP {
     config;
-    DEFAULT_API_URL = 'https://us-central1-agentguard-1b9e9.cloudfunctions.net';
+    DEFAULT_API_URL = 'https://www.supra-wall.com/api/v1';
     DEFAULT_DASHBOARD_URL = 'https://www.supra-wall.com';
     constructor(config) {
         this.config = {
@@ -17,7 +11,7 @@ class SupraWallMCP {
     }
     async checkPolicy(request) {
         try {
-            const response = await axios_1.default.post(`${this.config.apiUrl}/evaluateAction`, {
+            const response = await axios.post(`${this.config.apiUrl}/evaluateAction`, {
                 apiKey: this.config.apiKey,
                 toolName: request.toolName,
                 args: request.args,
@@ -48,7 +42,7 @@ class SupraWallMCP {
         try {
             // Note: In the current backend, approvals are primarily triggered via evaluateAction
             // returning REQUIRE_APPROVAL. This manual trigger uses evaluateAction with a flag.
-            const response = await axios_1.default.post(`${this.config.apiUrl}/evaluateAction`, {
+            const response = await axios.post(`${this.config.apiUrl}/evaluateAction`, {
                 apiKey: this.config.apiKey,
                 toolName: request.toolName,
                 args: request.args,
@@ -72,7 +66,7 @@ class SupraWallMCP {
             // The current backend logs automatically via evaluateAction.
             // We call evaluateAction with a "logOnly" intention if needed, 
             // or we can use a dedicated audit endpoint if we add it later.
-            await axios_1.default.post(`${this.config.apiUrl}/evaluateAction`, {
+            await axios.post(`${this.config.apiUrl}/evaluateAction`, {
                 apiKey: this.config.apiKey,
                 toolName: request.toolName || request.action,
                 args: request.args || {},
@@ -88,7 +82,7 @@ class SupraWallMCP {
     }
 }
 // MCP Plugin exports
-async function initialize(config) {
+export default async function initialize(config) {
     const suprawall = new SupraWallMCP(config);
     return {
         name: 'suprawall',

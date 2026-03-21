@@ -16,7 +16,7 @@ After installation, you must provide your API key to authenticate with the Supra
    ```bash
    /plugin configure suprawall
    ```
-2. When prompted, paste your API key from the [SupraWall Dashboard](https://app.suprawall.ai).
+2. When prompted, paste your API key from the [SupraWall Dashboard](https://app.supra-wall.com).
 
 ## Manual Configuration
 If you prefer manual configuration, you can add the following to your `mcp_config.json`:

@@ -19,7 +19,7 @@ Add enterprise-grade security to your Claude Desktop agents.
 ```
 
 ### 2. Get your API key
-1. Sign up at [app.suprawall.ai](https://app.suprawall.ai)
+1. Sign up at [app.supra-wall.com](https://app.supra-wall.com)
 2. Create an agent identity
 3. Copy your API key
 
@@ -86,7 +86,7 @@ Returns:
 {
   "approval_id": "apr_xyz789",
   "status": "pending",
-  "dashboard_url": "https://app.suprawall.ai/approvals/apr_xyz789"
+  "dashboard_url": "https://app.supra-wall.com/approvals/apr_xyz789"
 }
 ```
 
@@ -104,19 +104,19 @@ Log to audit trail:
 ## Configuration
 Configure via environment variables or Claude Desktop settings:
 - `SUPRAWALL_API_KEY` - Your API key (required)
-- `SUPRAWALL_API_URL` - API endpoint (default: `https://api.suprawall.ai`)
+- `SUPRAWALL_API_URL` - API endpoint (default: `https://api.supra-wall.com`)
 
 ## Pricing
 - **Free**: 10,000 policy checks/month
 - **Pro ($99/mo)**: 100,000 policy checks/month
 - **Enterprise**: Custom
 
-[View pricing →](https://suprawall.ai/pricing)
+[View pricing →](https://www.supra-wall.com/pricing)
 
 ## Support
-- 📧 Email: support@suprawall.ai
+- 📧 Email: support@supra-wall.com
 - 💬 Slack: [Join our community](https://join.slack.com/suprawall)
-- 📚 Docs: [suprawall.ai/docs](https://suprawall.ai/docs)
+- 📚 Docs: [supra-wall.com/docs](https://www.supra-wall.com/docs)
 
 ## License
 MIT
