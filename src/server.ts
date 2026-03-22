@@ -19,8 +19,8 @@ if (!API_KEY) {
 
 const server = new Server(
     {
-        name: 'suprawall',
-        version: '1.1.0',
+        name: 'suprawall-mcp',
+        version: '1.0.0',
     },
     {
         capabilities: {
@@ -34,43 +34,27 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         tools: [
             {
                 name: 'check_policy',
-                description: 'Check if an action is allowed by security policies',
+                description: 'Check if an AI action complies with configured compliance policies',
                 inputSchema: {
                     type: 'object',
                     properties: {
-                        toolName: { type: 'string', description: 'Name of the tool/action to check' },
-                        args: { type: 'object', description: 'Parameters for the action' },
-                        agentRole: { type: 'string', description: 'Role of the agent' },
-                        sessionId: { type: 'string', description: 'Unique session identifier' },
+                        action: { type: 'string', description: 'The action to evaluate for compliance' },
+                        context: { type: 'object', description: 'Additional context about the action' },
                     },
-                    required: ['toolName', 'args'],
+                    required: ['action'],
                 },
             },
             {
                 name: 'request_approval',
-                description: 'Request human approval for a high-risk action',
+                description: 'Request human approval for a potentially sensitive action',
                 inputSchema: {
                     type: 'object',
                     properties: {
-                        toolName: { type: 'string', description: 'Name of the tool requiring approval' },
-                        args: { type: 'object', description: 'Arguments of the tool' },
-                        reason: { type: 'string', description: 'Reason for requesting approval' },
+                        action: { type: 'string', description: 'The action requesting approval' },
+                        reason: { type: 'string', description: 'Why human approval is needed' },
+                        urgency: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Urgency level for approval' },
                     },
-                    required: ['toolName', 'args', 'reason'],
-                },
-            },
-            {
-                name: 'log_action',
-                description: 'Log an agent action to the audit trail',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        action: { type: 'string', description: 'Action performed' },
-                        toolName: { type: 'string', description: 'Tool used (optional)' },
-                        args: { type: 'object', description: 'Arguments used (optional)' },
-                        outcome: { type: 'string', enum: ['allowed', 'denied', 'approved'], description: 'Outcome of the action' },
-                    },
-                    required: ['action', 'outcome'],
+                    required: ['action', 'reason'],
                 },
             },
         ],
@@ -85,7 +69,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             case 'check_policy': {
                 const response = await axios.post(`${API_URL}/evaluateAction`, {
                     apiKey: API_KEY,
-                    ...args
+                    toolName: args?.action,
+                    args: args?.context || {}
                 });
                 return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
             }
@@ -94,16 +79,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 const response = await axios.post(`${API_URL}/evaluateAction`, {
                     apiKey: API_KEY,
                     forceApproval: true,
-                    ...args
-                });
-                return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
-            }
-
-            case 'log_action': {
-                const response = await axios.post(`${API_URL}/evaluateAction`, {
-                    apiKey: API_KEY,
-                    logOnly: true,
-                    ...args
+                    toolName: args?.action,
+                    args: {
+                        ...(args?.context || {}),
+                        reason: args?.reason,
+                        urgency: args?.urgency
+                    }
                 });
                 return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
             }
