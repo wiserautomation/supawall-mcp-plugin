@@ -1,3 +1,6 @@
+// Copyright 2026 SupraWall Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import axios from 'axios';
 
 interface SupraWallConfig {
@@ -28,7 +31,7 @@ interface AuditLogRequest {
 
 class SupraWallMCP {
   private config: SupraWallConfig;
-  private readonly DEFAULT_API_URL = 'https://www.supra-wall.com/api/v1';
+  private readonly DEFAULT_API_URL = 'https://www.supra-wall.com/api/v1/evaluate';
   private readonly DEFAULT_DASHBOARD_URL = 'https://www.supra-wall.com';
   
   constructor(config: SupraWallConfig) {
@@ -41,7 +44,7 @@ class SupraWallMCP {
   async checkPolicy(request: PolicyCheckRequest) {
     try {
       const response = await axios.post(
-        `${this.config.apiUrl}/evaluateAction`,
+        this.config.apiUrl!,
         {
           apiKey: this.config.apiKey,
           toolName: request.toolName,
@@ -61,11 +64,11 @@ class SupraWallMCP {
       };
     } catch (error: any) {
       console.error('SupraWall policy check failed:', error.response?.data || error.message);
-      // Fail open for now, but in strict mode we might want to fail closed
+      // Security: Default to DENY on API failure (Fail-Closed) - Audit 2.6
       return {
-        decision: 'ALLOW',
-        reason: 'SupraWall Safety Layer unavailable (Fail-Open)',
-        risk_score: 0,
+        decision: 'DENY',
+        reason: 'SupraWall Safety Layer unreachable (Fail-Closed for Security)',
+        risk_score: 100,
         approval_required: false
       };
     }
@@ -76,7 +79,7 @@ class SupraWallMCP {
       // Note: In the current backend, approvals are primarily triggered via evaluateAction
       // returning REQUIRE_APPROVAL. This manual trigger uses evaluateAction with a flag.
       const response = await axios.post(
-        `${this.config.apiUrl}/evaluateAction`,
+        this.config.apiUrl!,
         {
           apiKey: this.config.apiKey,
           toolName: request.toolName,
@@ -104,7 +107,7 @@ class SupraWallMCP {
       // We call evaluateAction with a "logOnly" intention if needed, 
       // or we can use a dedicated audit endpoint if we add it later.
       await axios.post(
-        `${this.config.apiUrl}/evaluateAction`,
+        this.config.apiUrl!,
         {
           apiKey: this.config.apiKey,
           toolName: request.toolName || request.action,
