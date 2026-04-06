@@ -1,3 +1,6 @@
+// Copyright 2026 SupraWall Contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -67,16 +70,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {
         switch (name) {
             case 'check_policy': {
-                const response = await axios.post(`${API_URL}/evaluateAction`, {
+                const response = await axios.post(`${API_URL}/evaluate`, {
                     apiKey: API_KEY,
                     toolName: args?.action,
-                    args: args?.context || {}
+                    args: args?.context || {},
+                    source: "mcp-claude"
                 });
                 return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
             }
 
             case 'request_approval': {
-                const response = await axios.post(`${API_URL}/evaluateAction`, {
+                const response = await axios.post(`${API_URL}/evaluate`, {
                     apiKey: API_KEY,
                     forceApproval: true,
                     toolName: args?.action,
@@ -84,7 +88,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                         ...(args?.context || {}),
                         reason: args?.reason,
                         urgency: args?.urgency
-                    }
+                    },
+                    source: "mcp-claude"
                 });
                 return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
             }

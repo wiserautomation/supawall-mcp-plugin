@@ -1,3 +1,6 @@
+# Copyright 2026 SupraWall Contributors
+# SPDX-License-Identifier: Apache-2.0
+
 from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
 from langchain.agents import AgentType, initialize_agent, load_tools
 from langchain_openai import ChatOpenAI

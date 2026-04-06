@@ -11,13 +11,13 @@ interface SupraWallConfig {
 interface PolicyCheckRequest {
   agentRole?: string;
   toolName: string;
-  args: any;
+  args: Record<string, unknown>;
   sessionId?: string;
 }
 
 interface ApprovalRequest {
   toolName: string;
-  args: any;
+  args: Record<string, unknown>;
   reason: string;
   riskLevel?: 'low' | 'medium' | 'high' | 'critical';
 }
@@ -25,7 +25,7 @@ interface ApprovalRequest {
 interface AuditLogRequest {
   action: string;
   toolName?: string;
-  args?: any;
+  args?: Record<string, unknown>;
   outcome: 'allowed' | 'denied' | 'approved';
 }
 
@@ -62,9 +62,9 @@ class SupraWallMCP {
         approval_required: response.data.decision === 'REQUIRE_APPROVAL',
         branding: response.data.branding
       };
-    } catch (error: any) {
-      console.error('SupraWall policy check failed:', error.response?.data || error.message);
-      // Security: Default to DENY on API failure (Fail-Closed) - Audit 2.6
+    } catch (error: unknown) {
+      console.error('SupraWall policy check failed:', error instanceof Error ? error.message : String(error));
+      // Security: Default to DENY on API failure (Fail-Closed)
       return {
         decision: 'DENY',
         reason: 'SupraWall Safety Layer unreachable (Fail-Closed for Security)',
@@ -73,7 +73,7 @@ class SupraWallMCP {
       };
     }
   }
-  
+
   async requestApproval(request: ApprovalRequest) {
     try {
       // Note: In the current backend, approvals are primarily triggered via evaluateAction
@@ -95,31 +95,27 @@ class SupraWallMCP {
         status: response.data.decision === 'REQUIRE_APPROVAL' ? 'pending' : 'decided',
         dashboard_url: `${this.DEFAULT_DASHBOARD_URL}/dashboard/approvals`
       };
-    } catch (error: any) {
-      console.error('SupraWall approval request failed:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('SupraWall approval request failed:', error instanceof Error ? error.message : String(error));
       throw new Error('Failed to request approval');
     }
   }
-  
+
   async logAction(request: AuditLogRequest) {
     try {
-      // The current backend logs automatically via evaluateAction.
-      // We call evaluateAction with a "logOnly" intention if needed, 
-      // or we can use a dedicated audit endpoint if we add it later.
       await axios.post(
         this.config.apiUrl!,
         {
           apiKey: this.config.apiKey,
           toolName: request.toolName || request.action,
-          args: request.args || {},
+          args: request.args ?? {},
           logOnly: true,
           outcome: request.outcome
         }
       );
-      
       return { success: true };
-    } catch (error: any) {
-      console.error('SupraWall audit log failed:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('SupraWall audit log failed:', error instanceof Error ? error.message : String(error));
       return { success: false };
     }
   }
