@@ -1,7 +1,15 @@
-import axios from 'axios';
+"use strict";
+// Copyright 2026 SupraWall Contributors
+// SPDX-License-Identifier: Apache-2.0
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = initialize;
+const axios_1 = __importDefault(require("axios"));
 class SupraWallMCP {
     config;
-    DEFAULT_API_URL = 'https://www.supra-wall.com/api/v1';
+    DEFAULT_API_URL = 'https://www.supra-wall.com/api/v1/evaluate';
     DEFAULT_DASHBOARD_URL = 'https://www.supra-wall.com';
     constructor(config) {
         this.config = {
@@ -11,7 +19,7 @@ class SupraWallMCP {
     }
     async checkPolicy(request) {
         try {
-            const response = await axios.post(`${this.config.apiUrl}/evaluateAction`, {
+            const response = await axios_1.default.post(this.config.apiUrl, {
                 apiKey: this.config.apiKey,
                 toolName: request.toolName,
                 args: request.args,
@@ -28,12 +36,12 @@ class SupraWallMCP {
             };
         }
         catch (error) {
-            console.error('SupraWall policy check failed:', error.response?.data || error.message);
-            // Fail open for now, but in strict mode we might want to fail closed
+            console.error('SupraWall policy check failed:', error instanceof Error ? error.message : String(error));
+            // Security: Default to DENY on API failure (Fail-Closed)
             return {
-                decision: 'ALLOW',
-                reason: 'SupraWall Safety Layer unavailable (Fail-Open)',
-                risk_score: 0,
+                decision: 'DENY',
+                reason: 'SupraWall Safety Layer unreachable (Fail-Closed for Security)',
+                risk_score: 100,
                 approval_required: false
             };
         }
@@ -42,7 +50,7 @@ class SupraWallMCP {
         try {
             // Note: In the current backend, approvals are primarily triggered via evaluateAction
             // returning REQUIRE_APPROVAL. This manual trigger uses evaluateAction with a flag.
-            const response = await axios.post(`${this.config.apiUrl}/evaluateAction`, {
+            const response = await axios_1.default.post(this.config.apiUrl, {
                 apiKey: this.config.apiKey,
                 toolName: request.toolName,
                 args: request.args,
@@ -57,32 +65,29 @@ class SupraWallMCP {
             };
         }
         catch (error) {
-            console.error('SupraWall approval request failed:', error.response?.data || error.message);
+            console.error('SupraWall approval request failed:', error instanceof Error ? error.message : String(error));
             throw new Error('Failed to request approval');
         }
     }
     async logAction(request) {
         try {
-            // The current backend logs automatically via evaluateAction.
-            // We call evaluateAction with a "logOnly" intention if needed, 
-            // or we can use a dedicated audit endpoint if we add it later.
-            await axios.post(`${this.config.apiUrl}/evaluateAction`, {
+            await axios_1.default.post(this.config.apiUrl, {
                 apiKey: this.config.apiKey,
                 toolName: request.toolName || request.action,
-                args: request.args || {},
+                args: request.args ?? {},
                 logOnly: true,
                 outcome: request.outcome
             });
             return { success: true };
         }
         catch (error) {
-            console.error('SupraWall audit log failed:', error.response?.data || error.message);
+            console.error('SupraWall audit log failed:', error instanceof Error ? error.message : String(error));
             return { success: false };
         }
     }
 }
 // MCP Plugin exports
-export default async function initialize(config) {
+async function initialize(config) {
     const suprawall = new SupraWallMCP(config);
     return {
         name: 'suprawall',

@@ -1,94 +1,85 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema, } from '@modelcontextprotocol/sdk/types.js';
-import axios from 'axios';
-import dotenv from 'dotenv';
-dotenv.config();
+"use strict";
+// Copyright 2026 SupraWall Contributors
+// SPDX-License-Identifier: Apache-2.0
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
+const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
+const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
+const axios_1 = __importDefault(require("axios"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const API_KEY = process.env.SUPRAWALL_API_KEY;
 const API_URL = process.env.SUPRAWALL_API_URL || 'https://www.supra-wall.com/api/v1';
 if (!API_KEY) {
     console.error('Error: SUPRAWALL_API_KEY environment variable is required.');
     process.exit(1);
 }
-const server = new Server({
-    name: 'suprawall',
-    version: '1.1.0',
+const server = new index_js_1.Server({
+    name: 'suprawall-mcp',
+    version: '1.0.0',
 }, {
     capabilities: {
         tools: {},
     },
 });
-server.setRequestHandler(ListToolsRequestSchema, async () => {
+server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => {
     return {
         tools: [
             {
                 name: 'check_policy',
-                description: 'Check if an action is allowed by security policies',
+                description: 'Check if an AI action complies with configured compliance policies',
                 inputSchema: {
                     type: 'object',
                     properties: {
-                        toolName: { type: 'string', description: 'Name of the tool/action to check' },
-                        args: { type: 'object', description: 'Parameters for the action' },
-                        agentRole: { type: 'string', description: 'Role of the agent' },
-                        sessionId: { type: 'string', description: 'Unique session identifier' },
+                        action: { type: 'string', description: 'The action to evaluate for compliance' },
+                        context: { type: 'object', description: 'Additional context about the action' },
                     },
-                    required: ['toolName', 'args'],
+                    required: ['action'],
                 },
             },
             {
                 name: 'request_approval',
-                description: 'Request human approval for a high-risk action',
+                description: 'Request human approval for a potentially sensitive action',
                 inputSchema: {
                     type: 'object',
                     properties: {
-                        toolName: { type: 'string', description: 'Name of the tool requiring approval' },
-                        args: { type: 'object', description: 'Arguments of the tool' },
-                        reason: { type: 'string', description: 'Reason for requesting approval' },
+                        action: { type: 'string', description: 'The action requesting approval' },
+                        reason: { type: 'string', description: 'Why human approval is needed' },
+                        urgency: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Urgency level for approval' },
                     },
-                    required: ['toolName', 'args', 'reason'],
-                },
-            },
-            {
-                name: 'log_action',
-                description: 'Log an agent action to the audit trail',
-                inputSchema: {
-                    type: 'object',
-                    properties: {
-                        action: { type: 'string', description: 'Action performed' },
-                        toolName: { type: 'string', description: 'Tool used (optional)' },
-                        args: { type: 'object', description: 'Arguments used (optional)' },
-                        outcome: { type: 'string', enum: ['allowed', 'denied', 'approved'], description: 'Outcome of the action' },
-                    },
-                    required: ['action', 'outcome'],
+                    required: ['action', 'reason'],
                 },
             },
         ],
     };
 });
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
+server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
     try {
         switch (name) {
             case 'check_policy': {
-                const response = await axios.post(`${API_URL}/evaluateAction`, {
+                const response = await axios_1.default.post(`${API_URL}/evaluate`, {
                     apiKey: API_KEY,
-                    ...args
+                    toolName: args?.action,
+                    args: args?.context || {},
+                    source: "mcp-claude"
                 });
                 return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
             }
             case 'request_approval': {
-                const response = await axios.post(`${API_URL}/evaluateAction`, {
+                const response = await axios_1.default.post(`${API_URL}/evaluate`, {
                     apiKey: API_KEY,
                     forceApproval: true,
-                    ...args
-                });
-                return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
-            }
-            case 'log_action': {
-                const response = await axios.post(`${API_URL}/evaluateAction`, {
-                    apiKey: API_KEY,
-                    logOnly: true,
-                    ...args
+                    toolName: args?.action,
+                    args: {
+                        ...(args?.context || {}),
+                        reason: args?.reason,
+                        urgency: args?.urgency
+                    },
+                    source: "mcp-claude"
                 });
                 return { content: [{ type: 'text', text: JSON.stringify(response.data, null, 2) }] };
             }
@@ -105,7 +96,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 });
 async function main() {
-    const transport = new StdioServerTransport();
+    const transport = new stdio_js_1.StdioServerTransport();
     await server.connect(transport);
     console.error('SupraWall MCP server running on stdio');
 }

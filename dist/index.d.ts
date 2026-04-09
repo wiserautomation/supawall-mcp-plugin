@@ -5,19 +5,19 @@ interface SupraWallConfig {
 interface PolicyCheckRequest {
     agentRole?: string;
     toolName: string;
-    args: any;
+    args: Record<string, unknown>;
     sessionId?: string;
 }
 interface ApprovalRequest {
     toolName: string;
-    args: any;
+    args: Record<string, unknown>;
     reason: string;
     riskLevel?: 'low' | 'medium' | 'high' | 'critical';
 }
 interface AuditLogRequest {
     action: string;
     toolName?: string;
-    args?: any;
+    args?: Record<string, unknown>;
     outcome: 'allowed' | 'denied' | 'approved';
 }
 export default function initialize(config: SupraWallConfig): Promise<{
