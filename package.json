@@ -1,5 +1,5 @@
 {
-  "name": "suprawall-mcp-plugin",
+  "name": "@suprawall/mcp-server",
   "version": "0.1.0",
   "description": "SupraWall security gateway as an MCP server",
   "mcpName": "io.github.wiserautomation/suprawall-mcp",
